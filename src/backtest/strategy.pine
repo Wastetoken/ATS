@@ -1,0 +1,31 @@
+//@version=6
+strategy("ATS Reverse Engineered Strategy", overlay=true, initial_capital=1000)
+
+// Parameters
+trailTriggerPctInput = input.float(1.5, "Trail Trigger %")
+trailOffsetPctInput = input.float(0.5, "Trail Offset %")
+slAtrMultiplier = input.float(2.0, "SL ATR Multiplier")
+
+// Indicators
+rsi15 = request.security(syminfo.tickerid, "15", ta.rsi(close, 14))
+ema50_1h = request.security(syminfo.tickerid, "60", ta.ema(close, 50))
+atr1h = request.security(syminfo.tickerid, "60", ta.atr(14))
+
+// BTC Regime (4H)
+btc_close = request.security("BINANCE:BTCUSDT", "240", close)
+btc_ema50 = request.security("BINANCE:BTCUSDT", "240", ta.ema(close, 50))
+btc_ema200 = request.security("BINANCE:BTCUSDT", "240", ta.ema(close, 200))
+
+btc_bullish = btc_close > btc_ema50 and btc_ema50 > btc_ema200
+price_bullish = close > ema50_1h
+mom_bullish = rsi15 > 50
+
+longCond = btc_bullish and price_bullish and mom_bullish
+
+if (longCond and strategy.position_size == 0)
+    strategy.entry("Long", strategy.long)
+    sl = close - (atr1h * slAtrMultiplier)
+    // Trailing stop execution
+    trigger = close * (1 + trailTriggerPctInput / 100)
+    offset = close * (trailOffsetPctInput / 100)
+    strategy.exit("Exit", "Long", stop=sl, trail_price=trigger, trail_offset=offset)
