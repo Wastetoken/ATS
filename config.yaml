@@ -1,0 +1,44 @@
+# Project Configuration
+
+data:
+  source: blofin
+  cache_dir: data/cache
+  raw_dir: data/raw
+  processed_dir: data/processed
+  api_base_url: https://openapi.blofin.com/api/v1
+  api_rate_limit: 10  # max requests per second
+  trade_history_csv: Position_history_08-01-2026_09-30-2026_1874538450.csv
+
+download:
+  timeframes:
+    - "1m"
+    - "5m"
+    - "15m"
+    - "1H"
+    - "4H"
+  warm_up_period_days: 30
+  post_entry_analysis_hours: 48
+
+features:
+  lookbacks:
+    - 5
+    - 10
+    - 20
+    - 50
+    - 100
+    - 200
+
+analysis:
+  min_condition_sample_size: 30
+  max_condition_combination_depth: 3
+  validation_periods:
+    - train: "2026-07-01_to_2026-08-15"
+      test: "2026-08-16_to_2026-09-30"
+
+backtest:
+  commission_pct: 0.04
+  slippage_pct: 0.05
+  optimization_ranges:
+    sl_atr: [1.0, 3.0, 0.5]
+    tp_atr: [2.0, 6.0, 0.5]
+  random_seed: 42
